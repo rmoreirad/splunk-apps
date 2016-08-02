@@ -1,0 +1,375 @@
+<form>
+  <label>Estatisticas gerenciais do portal do servico de Conferencia Web (Mconf)</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timerange">
+      <label>Selecione a data</label>
+      <default>
+        <earliest>0</earliest>
+        <latest>now</latest>
+      </default>
+      <change>
+        <eval token="form.et">strftime(relative_time(now(),'earliest'), "%F %T")</eval>
+        <eval token="form.lt">strftime(relative_time(now(),'latest'), "%F %T")</eval>
+      </change>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Usuários</title>
+      <chart>
+        <title>Usuários registrados</title>
+        <search>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT date_format(created_at,'%Y-%m') as MesCadastro,Count(id) as Total FROM mconf_production.users WHERE (users.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND users.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) Group By MesCadastro" | streamstats sum(Total) as TotalGeral | table MesCadastro, TotalGeral</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Usuários</title>
+      <chart>
+        <title>Top 10 Usuários registrados</title>
+        <search>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT institutions.acronym, count(users.id) as Total_Usuarios FROM mconf_production.users INNER JOIN mconf_production.permissions on users.id = permissions.user_id INNER JOIN mconf_production.institutions on permissions.subject_id = institutions.id WHERE permissions.subject_type='Institution' AND users.disabled=0 and users.approved=1 AND (users.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND users.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) GROUP BY permissions.subject_id ORDER BY Total_Usuarios DESC" | fields - _raw, _time | table acronym, Total_Usuarios | head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Comunidades</title>
+      <chart>
+        <title>Top 10 Comunidades criadas</title>
+        <search>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT institutions.acronym, count(spaces.id) as Total_Comunidades FROM  mconf_production.spaces inner join mconf_production.institutions  on spaces.institution_id=institutions.id  where disabled=0 AND (spaces.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND spaces.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) group by spaces.institution_id Order By Total_Comunidades DESC" | fields - _raw,_time | table acronym,Total_Comunidades | Head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Instituições</title>
+      <chart>
+        <title>Evolução do cadastro de instituições</title>
+        <search>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT name, date_format(created_at,'%Y-%m') as Data_Cadastro FROM mconf_production.institutions WHERE (institutions.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND institutions.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D'))" | fields - _raw, _time, count  | table Data_Cadastro,Total_Adesoes  | top limit=20 "Data_Cadastro" | sort "Data_Cadastro"| streamstats sum(count) as Total_Adesoes | rename count as "Adesões no mês" | rename Total_Adesoes as "Adesões acumuladas"</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.text">Mês</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Total</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Gravações</title>
+      <chart>
+        <title>Evolução mensal</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT date_format(FROM_UNIXTIME(floor(startTime div 1000)),'%Y-%m') as Ano FROM mconf_lb_production.Recordings WHERE (Recordings.startTime &gt;= floor(UNIX_TIMESTAMP(STR_TO_DATE('$form.et$', '%Y-%m-%D')) * 1000) AND Recordings.startTime &lt;= floor(UNIX_TIMESTAMP(STR_TO_DATE('$form.lt$', '%Y-%m-%D')))*1000)" | stats count by Ano | streamstats sum(count) as "Acumulado ao ano" | rename count as "Total ao ano"</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>(institutions.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND institutions.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D'))<option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Gravações</title>
+      <chart>
+        <title>Tempo médio de gravação (horas)</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT SEC_TO_TIME(AVG(TIME_TO_SEC(timediff(date_format(FROM_UNIXTIME(floor(endTime div 1000)),'%Y-%m-%d %H:%m:%S'),date_format(FROM_UNIXTIME(floor(startTime div 1000)),'%Y-%m-%d %H:%m:%S'))))) as Duracao, date_format(FROM_UNIXTIME(floor(startTime div 1000)),'%Y-%m') as Mes FROM mconf_lb_production.Recordings WHERE Recordings.Published=1 AND (Recordings.startTime &gt;= floor(UNIX_TIMESTAMP(STR_TO_DATE('$form.et$', '%Y-%m-%D')) * 1000) AND Recordings.startTime &lt;= floor(UNIX_TIMESTAMP(STR_TO_DATE('$form.lt$', '%Y-%m-%D')))*1000) GROUP BY Mes ORDER BY Mes DESC" | chart eval(round(max(Duracao)/60/60,0)) as Duracao by Mes</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sessões</title>
+      <chart>
+        <title>Total anual</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT id, date_format(createdAt,'%Y') as Ano FROM mconf_lb_production.MeetingEvents WHERE (createdAt &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND createdAt &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) AND maxUsers &gt; 0 AND uniqueUsers &gt; 1" | stats count(id) as Total by Ano</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sessões</title>
+      <chart>
+        <title>Total anual (salas distintas)</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT id, date_format(createdAt,'%Y') as Ano FROM mconf_lb_production.MeetingEvents WHERE (createdAt &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND createdAt &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) AND maxUsers &gt; 0 AND uniqueUsers &gt; 1 Group By Name" | stats count(id) as Total by Ano</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sessões</title>
+      <chart>
+        <title>Total mensal</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT id, date_format(createdAt,'%Y') as Ano, date_format(createdAt,'%Y-%m') as Mes FROM mconf_lb_production.MeetingEvents WHERE (createdAt &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND createdAt &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) AND maxUsers &gt; 0 AND uniqueUsers &gt; 1" | chart count(id) by Mes, Ano</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sessões</title>
+      <chart>
+        <title>Total mensal (salas distintas)</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query="SELECT id, date_format(createdAt,'%Y') as Ano, date_format(createdAt,'%Y-%m') as Mes FROM mconf_lb_production.MeetingEvents WHERE (createdAt &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND createdAt &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) AND maxUsers &gt; 0 AND uniqueUsers &gt; 1 Group By Name" | chart count(id) by Mes, Ano</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>
