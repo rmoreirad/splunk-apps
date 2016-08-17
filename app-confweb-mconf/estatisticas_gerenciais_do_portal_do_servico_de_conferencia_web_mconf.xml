@@ -19,7 +19,7 @@
       <chart>
         <title>Evolução de usuários registrados</title>
         <search>
-          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT date_format(created_at,'%Y-%m') as MesCadastro,Count(id) as Total FROM mconf_production.users WHERE (users.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND users.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) Group By MesCadastro" | streamstats sum(Total) as TotalGeral | table MesCadastro, TotalGeral</query>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT date_format(created_at,'%Y-%m') as MesCadastro,Count(id) as Total FROM mconf_production.users WHERE (users.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND users.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D')) Group By MesCadastro" | streamstats sum(Total) as TotalGeral | table MesCadastro, TotalGeral, Total  | rename TotalGeral as "Total acumlado"</query>
           <earliest>$timerange.earliest$</earliest>
           <latest>$timerange.latest$</latest>
         </search>
@@ -36,7 +36,7 @@
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.nullValueMode">zero</option>
         <option name="charting.chart.showDataLabels">all</option>
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">default</option>
@@ -145,7 +145,7 @@
       <chart>
         <title>Evolução de adesões</title>
         <search>
-          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT name, date_format(created_at,'%Y-%m') as Data_Cadastro FROM mconf_production.institutions WHERE (institutions.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND institutions.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D'))" | fields - _raw, _time, count  | table Data_Cadastro,Total_Adesoes  | top limit=20 "Data_Cadastro" | sort "Data_Cadastro"| streamstats sum(count) as Total_Adesoes | rename count as "Adesões no mês" | rename Total_Adesoes as "Adesões acumuladas"</query>
+          <query>| dbxquery connection = "mconf-production" shortnames=1 query = "SELECT name, date_format(created_at,'%Y-%m') as Data_Cadastro FROM mconf_production.institutions WHERE (institutions.created_at &gt;= STR_TO_DATE('$form.et$', '%Y-%m-%D') AND institutions.created_at &lt;= STR_TO_DATE('$form.lt$', '%Y-%m-%D'))" | fields - _raw, _time, count  | table Data_Cadastro,Total_Adesoes  | top limit=120 "Data_Cadastro" | sort "Data_Cadastro"| streamstats sum(count) as Total_Adesoes | rename count as "Adesões no mês" | rename Total_Adesoes as "Adesões acumuladas"</query>
           <earliest>$timerange.earliest$</earliest>
           <latest>$timerange.latest$</latest>
         </search>
@@ -399,8 +399,8 @@
         <title>Tempo médio de reunião (Minutos)</title>
         <search>
           <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT date_format(createdAt,'%Y-%m') as CriadaEm, CAST(AVG(TIMESTAMPDIFF(SECOND, createdAt, endedAt) div 60) AS UNSIGNED) AS avg FROM mconf_lb_production.MeetingEvents WHERE (createdAt &gt;= '$form.et$') AND (createdAt &lt;= '$form.lt$') AND (uniqueUsers &gt;= 2) GROUP By CriadaEm"  | table CriadaEm, avg | rename CriadaEm as Mês, avg as "Tempo medio (Minutos)"</query>
-          <earliest>0</earliest>
-          <latest></latest>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
