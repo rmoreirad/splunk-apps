@@ -81,7 +81,7 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
+        <option name="charting.legend.placement">none</option>
       </chart>
     </panel>
     <panel>
@@ -514,14 +514,9 @@ mconf_lb_production.UserEvents UE INNER JOIN mconf_lb_production.MeetingEvents M
       <chart>
         <title>Salas mais usadas (Total de reuniões)</title>
         <search>
-          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT name, COUNT(*) AS count, CAST(MAX(uniqueUsers) AS UNSIGNED) AS maxUniqueUsers, 
-CAST(SUM(uniqueUsers) as UNSIGNED) AS totalUsers FROM 
-mconf_lb_production.MeetingEvents WHERE 
-(createdAt &gt;= '$form.et$') AND 
-(createdAt &lt;= '$form.lt$') AND 
-(uniqueUsers &gt;= 2) GROUP BY name ORDER BY count DESC"  | table name, count | head 10</query>
-          <earliest></earliest>
-          <latest></latest>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT name, COUNT(*) AS count, CAST(MAX(uniqueUsers) AS UNSIGNED) AS maxUniqueUsers,  CAST(SUM(uniqueUsers) as UNSIGNED) AS totalUsers FROM  mconf_lb_production.MeetingEvents WHERE  (createdAt &gt;= '$form.et$') AND  (createdAt &lt;= '$form.lt$') AND  (uniqueUsers &gt;= 2) GROUP BY name ORDER BY count DESC"  | table name, count | head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
@@ -549,11 +544,49 @@ mconf_lb_production.MeetingEvents WHERE
       </chart>
     </panel>
     <panel>
-      <title>Salas mais usadas  (Top 10)</title>
+      <title>Sessões (Top 10)</title>
       <chart>
         <title>Salas mais usadas (Máximo de usuários)</title>
         <search>
           <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT name, COUNT(*) AS count, CAST(MAX(uniqueUsers) AS UNSIGNED) AS maxUniqueUsers,  CAST(SUM(uniqueUsers) as UNSIGNED) AS totalUsers FROM  mconf_lb_production.MeetingEvents WHERE  (createdAt &gt;= '$form.et$') AND  (createdAt &lt;= '$form.lt$') AND  (uniqueUsers &gt;= 2) GROUP BY name ORDER BY count DESC"  | table name, maxUniqueUsers | head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.03</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sessões (Top 10)</title>
+      <chart>
+        <title>Salas mais usadas (Total de usuários)</title>
+        <search>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT name, COUNT(*) AS count, CAST(MAX(uniqueUsers) AS UNSIGNED) AS maxUniqueUsers,  CAST(SUM(uniqueUsers) as UNSIGNED) AS totalUsers FROM  mconf_lb_production.MeetingEvents WHERE  (createdAt &gt;= '$form.et$') AND  (createdAt &lt;= '$form.lt$') AND  (uniqueUsers &gt;= 2) GROUP BY name ORDER BY count DESC"  | table name, totalUsers | head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
@@ -581,11 +614,13 @@ mconf_lb_production.MeetingEvents WHERE
       </chart>
     </panel>
     <panel>
-      <title>Salas mais usadas  (Top 10)</title>
+      <title>Sessões (Top 10)</title>
       <chart>
-        <title>Salas mais usadas (Total de usuários)</title>
+        <title>Salas mais usadas (Pessoais)</title>
         <search>
-          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT name, COUNT(*) AS count, CAST(MAX(uniqueUsers) AS UNSIGNED) AS maxUniqueUsers,  CAST(SUM(uniqueUsers) as UNSIGNED) AS totalUsers FROM  mconf_lb_production.MeetingEvents WHERE  (createdAt &gt;= '$form.et$') AND  (createdAt &lt;= '$form.lt$') AND  (uniqueUsers &gt;= 2) GROUP BY name ORDER BY count DESC"  | table name, totalUsers | head 10</query>
+          <query>| dbxquery connection = "mconf-lb-production" shortnames=1 query = "SELECT UE.name, COUNT(*) AS count FROM  mconf_lb_production.UserEvents UE INNER JOIN  mconf_lb_production.MeetingEvents ME ON (ME.id = UE.meetingEventId) WHERE   (UE.createdAt &gt;= '$form.et$') AND  (UE.createdAt &lt;= '$form.lt$') AND  (ME.uniqueUsers &gt;= 2) GROUP BY UE.name ORDER BY count DESC"  | table name, count | head 10</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
